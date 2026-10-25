@@ -5,7 +5,7 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 def format_cell_header(cell, text: str, fill_hex: str = "1E3A8A"):
     """Applique le style d'en-tête SaaS LogMed."""
@@ -19,7 +19,9 @@ def export_reconciliation_excel(
     reconciliation_results: Dict[str, Any],
     criteria: List[Dict[str, Any]],
     file_a_name: str = "Tableau A",
-    file_b_name: str = "Tableau B"
+    file_b_name: str = "Tableau B",
+    selected_cols_a: Optional[List[str]] = None,
+    selected_cols_b: Optional[List[str]] = None
 ):
     """Génère le classeur Excel multi-onglets complet."""
     wb = openpyxl.Workbook()
@@ -100,24 +102,29 @@ def export_reconciliation_excel(
     ws_mat.views.sheetView[0].showGridLines = True
     
     if matched:
-        cols_a = list(matched[0]["row_a"].keys())
-        cols_b = list(matched[0]["row_b"].keys())
+        all_cols_a = list(matched[0]["row_a"].keys())
+        all_cols_b = list(matched[0]["row_b"].keys())
+        cols_a = [c for c in selected_cols_a if c in all_cols_a] if selected_cols_a is not None else all_cols_a
+        cols_b = [c for c in selected_cols_b if c in all_cols_b] if selected_cols_b is not None else all_cols_b
         
-        headers = ["N°", "STATUT RAPPROCHEMENT", "SCORE (%)", "ÉCART MONTANT"] + [f"[A] {c}" for c in cols_a] + [f"[B] {c}" for c in cols_b]
+        headers = ["N°", "STATUT RAPPROCHEMENT", "PASSE", "SCORE (%)", "ÉCART MONTANT", "JUSTIFICATION / EXPLICATION"] + [f"[A] {c}" for c in cols_a] + [f"[B] {c}" for c in cols_b]
         for col_i, h in enumerate(headers, 1):
             fill_c = "1E3A8A" if "[A]" in h else ("0284C7" if "[B]" in h else "0F172A")
             format_cell_header(ws_mat.cell(row=1, column=col_i), h, fill_c)
             
         for row_i, m in enumerate(matched, 2):
             ws_mat.cell(row=row_i, column=1, value=row_i - 1).alignment = Alignment(horizontal="center")
-            ws_mat.cell(row=row_i, column=2, value=m["statut"])
-            ws_mat.cell(row=row_i, column=3, value=f"{m['score_pct']}%").alignment = Alignment(horizontal="center")
+            ws_mat.cell(row=row_i, column=2, value=m.get("statut", ""))
+            ws_mat.cell(row=row_i, column=3, value=f"Passe {m.get('passe', 1)}").alignment = Alignment(horizontal="center")
+            ws_mat.cell(row=row_i, column=4, value=f"{m.get('score_pct', 0)}%").alignment = Alignment(horizontal="center")
             
-            c_delta = ws_mat.cell(row=row_i, column=4, value=m["delta_amount"])
+            c_delta = ws_mat.cell(row=row_i, column=5, value=m.get("delta_amount", 0.0))
             c_delta.number_format = '#,##0.00'
             
+            ws_mat.cell(row=row_i, column=6, value=m.get("explication", ""))
+            
             # Données A
-            curr_c = 5
+            curr_c = 7
             for c_name in cols_a:
                 ws_mat.cell(row=row_i, column=curr_c, value=m["row_a"].get(c_name))
                 curr_c += 1
@@ -129,8 +136,14 @@ def export_reconciliation_excel(
             for col_k in range(1, len(headers) + 1):
                 ws_mat.cell(row=row_i, column=col_k).border = thin_border
                 
-        # Auto-fit dimensions
-        for c in range(1, min(len(headers) + 1, 35)):
+        # Largeurs de colonnes optimisées
+        ws_mat.column_dimensions["A"].width = 8
+        ws_mat.column_dimensions["B"].width = 28
+        ws_mat.column_dimensions["C"].width = 12
+        ws_mat.column_dimensions["D"].width = 12
+        ws_mat.column_dimensions["E"].width = 16
+        ws_mat.column_dimensions["F"].width = 45
+        for c in range(7, min(len(headers) + 1, 40)):
             ws_mat.column_dimensions[get_column_letter(c)].width = 18
             
     # -------------------------------------------------------------
@@ -139,7 +152,8 @@ def export_reconciliation_excel(
     ws_oa = wb.create_sheet(title="Suspens Tableau A")
     ws_oa.views.sheetView[0].showGridLines = True
     if orphans_a:
-        cols_oa = list(orphans_a[0].keys())
+        all_cols_oa = list(orphans_a[0].keys())
+        cols_oa = [c for c in selected_cols_a if c in all_cols_oa] if selected_cols_a is not None else all_cols_oa
         for c_i, h in enumerate(["N°"] + cols_oa, 1):
             format_cell_header(ws_oa.cell(row=1, column=c_i), h, "D97706")
         for r_i, o in enumerate(orphans_a, 2):
@@ -155,7 +169,8 @@ def export_reconciliation_excel(
     ws_ob = wb.create_sheet(title="Suspens Tableau B")
     ws_ob.views.sheetView[0].showGridLines = True
     if orphans_b:
-        cols_ob = list(orphans_b[0].keys())
+        all_cols_ob = list(orphans_b[0].keys())
+        cols_ob = [c for c in selected_cols_b if c in all_cols_ob] if selected_cols_b is not None else all_cols_ob
         for c_i, h in enumerate(["N°"] + cols_ob, 1):
             format_cell_header(ws_ob.cell(row=1, column=c_i), h, "991B1B")
         for r_i, o in enumerate(orphans_b, 2):

@@ -52,7 +52,13 @@ def list_profiles() -> List[str]:
     files = [f[:-5] for f in os.listdir(PROFILES_DIR) if f.endswith(".json")]
     return sorted(files)
 
-def save_profile(name: str, criteria: List[Dict[str, Any]], description: str = "") -> str:
+def save_profile(
+    name: str,
+    criteria: List[Dict[str, Any]],
+    description: str = "",
+    selected_cols_a: Optional[List[str]] = None,
+    selected_cols_b: Optional[List[str]] = None
+) -> str:
     """Enregistre un profil de configuration."""
     ensure_profiles_dir()
     clean_name = "".join([c for c in name if c.isalnum() or c in (" ", "_", "-")]).strip()
@@ -62,6 +68,11 @@ def save_profile(name: str, criteria: List[Dict[str, Any]], description: str = "
         "description": description,
         "criteria": criteria
     }
+    if selected_cols_a is not None:
+        payload["selected_cols_a"] = selected_cols_a
+    if selected_cols_b is not None:
+        payload["selected_cols_b"] = selected_cols_b
+
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
     return file_path

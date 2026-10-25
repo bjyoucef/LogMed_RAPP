@@ -4,7 +4,7 @@ Composant de glisser-déposer de fichier Excel/CSV avec sélecteur d'onglets.
 import os
 from PyQt5.QtWidgets import (
     QFrame, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QComboBox, QFileDialog, QWidget
+    QComboBox, QFileDialog, QWidget, QSizePolicy
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 from core.file_reader import get_file_sheets
@@ -23,6 +23,7 @@ class DropZoneCard(QFrame):
         self.setObjectName("dropZoneCard")
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setProperty("class", "card")
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.init_ui()
 
     def init_ui(self):

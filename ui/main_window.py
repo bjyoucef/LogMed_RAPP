@@ -4,7 +4,7 @@ Fenêtre principale orchestrant le workflow en 3 étapes de LogMed RAPP.
 import os
 import pandas as pd
 from PyQt5.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QStackedWidget, QFileDialog, QMessageBox,
     QProgressBar, QFrame
 )
@@ -39,7 +39,21 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("LogMed RAPP — Rapprochement Intelligent de Tableaux")
-        self.resize(1180, 780)
+
+        # Adapter la taille à la zone disponible de l'écran (évite le débordement sous la barre des tâches)
+        screen = QApplication.primaryScreen()
+        if screen:
+            avail = screen.availableGeometry()
+            target_w = min(1240, int(avail.width() * 0.94))
+            target_h = min(730, int(avail.height() * 0.90))
+            self.resize(target_w, target_h)
+            # Centrer proprement la fenêtre dans la zone utile
+            geo = self.frameGeometry()
+            geo.moveCenter(avail.center())
+            self.move(geo.topLeft())
+        else:
+            self.resize(1180, 700)
+        self.setMinimumSize(960, 600)
 
         self.df_a: pd.DataFrame = None
         self.df_b: pd.DataFrame = None
@@ -56,20 +70,20 @@ class MainWindow(QMainWindow):
         central_widget.setObjectName("centralWidget")
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(20, 20, 20, 20)
-        main_layout.setSpacing(15)
+        main_layout.setContentsMargins(16, 10, 16, 10)
+        main_layout.setSpacing(10)
 
         # 1. Hero Header & Stepper
         hero = QFrame()
         hero.setObjectName("heroCard")
         hero.setProperty("class", "hero-card")
         hero_layout = QHBoxLayout(hero)
-        hero_layout.setContentsMargins(22, 16, 22, 16)
+        hero_layout.setContentsMargins(18, 10, 18, 10)
 
         title_box = QVBoxLayout()
-        title_box.setSpacing(3)
+        title_box.setSpacing(2)
         lbl_app = QLabel("LogMed RAPP")
-        lbl_app.setStyleSheet("color: #ffffff; font-size: 20px; font-weight: bold; background: transparent;")
+        lbl_app.setStyleSheet("color: #ffffff; font-size: 19px; font-weight: bold; background: transparent;")
         lbl_sub = QLabel("Rapprochement & Réconciliation de Tableaux Excel / CSV")
         lbl_sub.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 12px; background: transparent;")
         title_box.addWidget(lbl_app)
@@ -94,16 +108,17 @@ class MainWindow(QMainWindow):
         # ÉTAPE 1 : Fichiers
         self.page_files = QWidget()
         page1_layout = QVBoxLayout(self.page_files)
-        page1_layout.setContentsMargins(0, 10, 0, 0)
+        page1_layout.setContentsMargins(0, 4, 0, 0)
         
         cards_layout = QHBoxLayout()
+        cards_layout.setSpacing(14)
         self.card_a = DropZoneCard("Tableau Source A", "Ex: Grand Livre, Factures, Rapprochement KT")
         self.card_a.file_loaded.connect(self.on_file_a_loaded)
-        cards_layout.addWidget(self.card_a)
+        cards_layout.addWidget(self.card_a, 1)
 
         self.card_b = DropZoneCard("Tableau Source B", "Ex: Relevé Bancaire, Portail PNC, Encaissements")
         self.card_b.file_loaded.connect(self.on_file_b_loaded)
-        cards_layout.addWidget(self.card_b)
+        cards_layout.addWidget(self.card_b, 1)
         page1_layout.addLayout(cards_layout)
 
         self.stack.addWidget(self.page_files)
@@ -111,7 +126,7 @@ class MainWindow(QMainWindow):
         # ÉTAPE 2 : Règles & Mappage
         self.page_mapping = QWidget()
         page2_layout = QVBoxLayout(self.page_mapping)
-        page2_layout.setContentsMargins(0, 10, 0, 0)
+        page2_layout.setContentsMargins(0, 4, 0, 0)
         self.mapping_widget = MappingWidget()
         page2_layout.addWidget(self.mapping_widget)
         self.stack.addWidget(self.page_mapping)
@@ -119,7 +134,7 @@ class MainWindow(QMainWindow):
         # ÉTAPE 3 : Résultats & Export
         self.page_results = QWidget()
         page3_layout = QVBoxLayout(self.page_results)
-        page3_layout.setContentsMargins(0, 10, 0, 0)
+        page3_layout.setContentsMargins(0, 4, 0, 0)
         self.preview_widget = PreviewWidget()
         page3_layout.addWidget(self.preview_widget)
         self.stack.addWidget(self.page_results)
@@ -129,12 +144,16 @@ class MainWindow(QMainWindow):
         # 3. Barre de progression (cachée par défaut)
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 0)
+        self.progress_bar.setFixedHeight(14)
         self.progress_bar.setVisible(False)
         main_layout.addWidget(self.progress_bar)
 
         # 4. Footer de Navigation
         footer = QHBoxLayout()
+        footer.setContentsMargins(0, 2, 0, 0)
         self.btn_prev = QPushButton("< Précédent")
+        self.btn_prev.setFixedHeight(38)
+        self.btn_prev.setCursor(Qt.PointingHandCursor)
         self.btn_prev.clicked.connect(self.go_prev)
         self.btn_prev.setVisible(False)
         footer.addWidget(self.btn_prev)
@@ -143,11 +162,15 @@ class MainWindow(QMainWindow):
 
         self.btn_next = QPushButton("Passer aux règles >")
         self.btn_next.setProperty("class", "btn-primary")
+        self.btn_next.setFixedHeight(38)
+        self.btn_next.setCursor(Qt.PointingHandCursor)
         self.btn_next.clicked.connect(self.go_next)
         footer.addWidget(self.btn_next)
 
         self.btn_export = QPushButton("Exporter le Classeur Excel (.xlsx)")
         self.btn_export.setProperty("class", "btn-success")
+        self.btn_export.setFixedHeight(38)
+        self.btn_export.setCursor(Qt.PointingHandCursor)
         self.btn_export.setVisible(False)
         self.btn_export.clicked.connect(self.export_excel)
         footer.addWidget(self.btn_export)
@@ -210,7 +233,10 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Erreur de lecture", f"Impossible de lire les fichiers :\n{str(e)}")
                 return
 
-            self.mapping_widget.set_columns(list(self.df_a.columns), list(self.df_b.columns))
+            cols_a = list(self.df_a.columns)
+            cols_b = list(self.df_b.columns)
+            self.mapping_widget.set_columns(cols_a, cols_b)
+            self.preview_widget.set_columns_info(cols_a, cols_b)
             # Suggérer automatiquement
             suggestions = suggest_column_pairs(self.df_a, self.df_b)
             self.mapping_widget.set_criteria(suggestions)
@@ -252,7 +278,8 @@ class MainWindow(QMainWindow):
         self.progress_bar.setVisible(False)
         self.btn_next.setEnabled(True)
         self.results = results
-        self.preview_widget.display_results(results)
+        sel_a, sel_b = self.mapping_widget.get_selected_columns()
+        self.preview_widget.display_results(results, selected_cols_a=sel_a, selected_cols_b=sel_b)
 
         self.stack.setCurrentIndex(2)
         self.update_step_labels(2)
@@ -277,12 +304,15 @@ class MainWindow(QMainWindow):
         if out_path:
             try:
                 criteria = self.mapping_widget.get_configured_criteria()
+                sel_a, sel_b = self.preview_widget.get_selected_columns()
                 export_reconciliation_excel(
                     out_path,
                     results_to_export,
                     criteria,
                     os.path.basename(self.file_a_path),
-                    os.path.basename(self.file_b_path)
+                    os.path.basename(self.file_b_path),
+                    selected_cols_a=sel_a,
+                    selected_cols_b=sel_b
                 )
                 QMessageBox.information(
                     self, "Export Réussi", 

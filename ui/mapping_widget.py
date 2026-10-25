@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QHeaderView, QMessageBox, QInputDialog
 )
 from PyQt5.QtCore import Qt
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import difflib
 from core.profile_manager import list_profiles, save_profile, load_profile
 
@@ -23,6 +23,8 @@ class MappingWidget(QWidget):
         super().__init__(parent)
         self.cols_a: List[str] = []
         self.cols_b: List[str] = []
+        self.selected_cols_a: List[str] = []
+        self.selected_cols_b: List[str] = []
         self.criteria: List[Dict[str, Any]] = []
         self.init_ui()
 
@@ -61,16 +63,23 @@ class MappingWidget(QWidget):
             "Colonne Tableau A", "Colonne Tableau B", "Type de Règle", 
             "Tolérance", "Poids", "Action"
         ])
+        self.table.verticalHeader().setDefaultSectionSize(44)
+        self.table.setAlternatingRowColors(True)
+
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.Interactive)
+        header.setSectionResizeMode(3, QHeaderView.Interactive)
+        header.setSectionResizeMode(4, QHeaderView.Interactive)
+        header.setSectionResizeMode(5, QHeaderView.Fixed)
+        self.table.setColumnWidth(2, 220)
+        self.table.setColumnWidth(3, 90)
+        self.table.setColumnWidth(4, 75)
+        self.table.setColumnWidth(5, 54)
         layout.addWidget(self.table)
 
-        # Barre inférieure : Ajouter / Réinitialiser
+        # Barre inférieure : Ajouter / Réinitialiser et sélection des colonnes
         bottom_bar = QHBoxLayout()
         btn_add = QPushButton("+ Ajouter un critère")
         btn_add.setProperty("class", "btn-primary")
@@ -79,11 +88,55 @@ class MappingWidget(QWidget):
 
         bottom_bar.addStretch()
 
+        self.lbl_columns_summary = QLabel("Colonnes du résultat : Toutes")
+        self.lbl_columns_summary.setStyleSheet("color: #475569; font-size: 12px; font-weight: 500;")
+        bottom_bar.addWidget(self.lbl_columns_summary)
+
+        self.btn_select_cols = QPushButton("⚙️ Choisir les colonnes du résultat...")
+        self.btn_select_cols.setCursor(Qt.PointingHandCursor)
+        self.btn_select_cols.setToolTip("Choisir les colonnes des deux tableaux qui figureront dans les résultats et l'export")
+        self.btn_select_cols.clicked.connect(self.on_customize_columns_clicked)
+        bottom_bar.addWidget(self.btn_select_cols)
+
         layout.addLayout(bottom_bar)
 
     def set_columns(self, cols_a: List[str], cols_b: List[str]):
-        self.cols_a = cols_a
-        self.cols_b = cols_b
+        self.cols_a = list(cols_a)
+        self.cols_b = list(cols_b)
+        self.selected_cols_a = list(cols_a)
+        self.selected_cols_b = list(cols_b)
+        self.update_columns_summary()
+
+    def update_columns_summary(self):
+        tot_a = len(self.cols_a)
+        tot_b = len(self.cols_b)
+        sel_a = len(self.selected_cols_a)
+        sel_b = len(self.selected_cols_b)
+        if tot_a == 0 and tot_b == 0:
+            self.lbl_columns_summary.setText("Colonnes du résultat : Aucune")
+        elif sel_a == tot_a and sel_b == tot_b:
+            self.lbl_columns_summary.setText(f"Colonnes du résultat : Toutes ({sel_a} col. A, {sel_b} col. B)")
+        else:
+            self.lbl_columns_summary.setText(f"Colonnes du résultat : {sel_a}/{tot_a} (A) et {sel_b}/{tot_b} (B)")
+
+    def on_customize_columns_clicked(self):
+        from ui.column_selector_dialog import ColumnSelectorDialog
+        dlg = ColumnSelectorDialog(
+            self.cols_a, self.cols_b,
+            self.selected_cols_a, self.selected_cols_b,
+            parent=self
+        )
+        if dlg.exec_():
+            self.selected_cols_a, self.selected_cols_b = dlg.get_selected_columns()
+            self.update_columns_summary()
+
+    def get_selected_columns(self) -> Tuple[List[str], List[str]]:
+        return list(self.selected_cols_a), list(self.selected_cols_b)
+
+    def set_selected_columns(self, cols_a: List[str], cols_b: List[str]):
+        self.selected_cols_a = [c for c in cols_a if c in self.cols_a]
+        self.selected_cols_b = [c for c in cols_b if c in self.cols_b]
+        self.update_columns_summary()
 
     def set_criteria(self, criteria_list: List[Dict[str, Any]]):
         self.table.setRowCount(0)
@@ -97,6 +150,7 @@ class MappingWidget(QWidget):
 
         # 0. Combo Col A
         combo_a = QComboBox()
+        combo_a.setFixedHeight(34)
         combo_a.addItems(self.cols_a)
         target_a = crit.get("col_a", "")
         if target_a in self.cols_a:
@@ -109,6 +163,7 @@ class MappingWidget(QWidget):
 
         # 1. Combo Col B
         combo_b = QComboBox()
+        combo_b.setFixedHeight(34)
         combo_b.addItems(self.cols_b)
         target_b = crit.get("col_b", "")
         if target_b in self.cols_b:
@@ -121,6 +176,7 @@ class MappingWidget(QWidget):
 
         # 2. Combo Rule Type
         combo_rule = QComboBox()
+        combo_rule.setFixedHeight(34)
         for k, v in RULE_TYPES.items():
             combo_rule.addItem(v, k)
         rule_key = crit.get("rule_type", "text_fuzzy")
@@ -131,19 +187,36 @@ class MappingWidget(QWidget):
 
         # 3. Tolérance
         edit_tol = QLineEdit(str(crit.get("tolerance", "85")))
-        edit_tol.setFixedWidth(70)
+        edit_tol.setFixedHeight(34)
+        edit_tol.setAlignment(Qt.AlignCenter)
         self.table.setCellWidget(row, 3, edit_tol)
 
         # 4. Poids
         edit_weight = QLineEdit(str(crit.get("weight", "1.0")))
-        edit_weight.setFixedWidth(50)
+        edit_weight.setFixedHeight(34)
+        edit_weight.setAlignment(Qt.AlignCenter)
         self.table.setCellWidget(row, 4, edit_weight)
 
         # 5. Bouton Supprimer
         btn_del = QPushButton("✕")
-        btn_del.setProperty("class", "btn-danger")
         btn_del.setCursor(Qt.PointingHandCursor)
-        btn_del.setFixedWidth(32)
+        btn_del.setFixedSize(34, 34)
+        btn_del.setStyleSheet("""
+            QPushButton {
+                background-color: #fee2e2;
+                color: #dc2626;
+                border: 1px solid #fca5a5;
+                border-radius: 6px;
+                font-weight: 700;
+                font-size: 13px;
+                padding: 0px;
+            }
+            QPushButton:hover {
+                background-color: #fecaca;
+                border-color: #ef4444;
+            }
+        """)
+        btn_del.setToolTip("Supprimer cette règle")
         btn_del.clicked.connect(lambda _, b=btn_del: self.remove_criteria_row(b))
         self.table.setCellWidget(row, 5, btn_del)
 
@@ -196,7 +269,12 @@ class MappingWidget(QWidget):
             return
         name, ok = QInputDialog.getText(self, "Enregistrer le modèle", "Nom du modèle de rapprochement :")
         if ok and name.strip():
-            save_profile(name.strip(), criteria)
+            save_profile(
+                name.strip(),
+                criteria,
+                selected_cols_a=self.selected_cols_a,
+                selected_cols_b=self.selected_cols_b
+            )
             self.refresh_profiles_list()
             QMessageBox.information(self, "Succès", f"Modèle '{name}' enregistré avec succès !")
 
@@ -205,6 +283,9 @@ class MappingWidget(QWidget):
         if not name or name == "Aucun modèle":
             return
         data = load_profile(name)
-        if data and "criteria" in data:
-            self.set_criteria(data["criteria"])
+        if data:
+            if "criteria" in data:
+                self.set_criteria(data["criteria"])
+            if "selected_cols_a" in data and "selected_cols_b" in data:
+                self.set_selected_columns(data["selected_cols_a"], data["selected_cols_b"])
             QMessageBox.information(self, "Succès", f"Modèle '{name}' appliqué !")
