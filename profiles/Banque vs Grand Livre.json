@@ -1,0 +1,28 @@
+{
+  "name": "Banque vs Grand Livre",
+  "description": "Rapprochement bancaire (Relevé de compte vs Comptabilité générale).",
+  "criteria": [
+    {
+      "col_a": "Libelle",
+      "col_b": "Description",
+      "rule_type": "text_fuzzy",
+      "tolerance": 80.0,
+      "weight": 1.2
+    },
+    {
+      "col_a": "Date_Ecriture",
+      "col_b": "Date_Valeur",
+      "rule_type": "date",
+      "tolerance": 5.0,
+      "weight": 1.5
+    },
+    {
+      "col_a": "Montant",
+      "col_b": "Montant",
+      "rule_type": "amount",
+      "tolerance": 0.05,
+      "weight": 2.5,
+      "invert_sign": true
+    }
+  ]
+}

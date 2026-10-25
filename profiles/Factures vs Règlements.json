@@ -1,0 +1,27 @@
+{
+  "name": "Factures vs Règlements",
+  "description": "Contrôle des factures émises et des encaissements / règlements reçus.",
+  "criteria": [
+    {
+      "col_a": "Num_Facture",
+      "col_b": "Reference",
+      "rule_type": "text_fuzzy",
+      "tolerance": 85.0,
+      "weight": 2.0
+    },
+    {
+      "col_a": "Client",
+      "col_b": "Tiers",
+      "rule_type": "text_fuzzy",
+      "tolerance": 80.0,
+      "weight": 1.2
+    },
+    {
+      "col_a": "Total_TTC",
+      "col_b": "Montant_Paye",
+      "rule_type": "amount",
+      "tolerance": 0.05,
+      "weight": 2.0
+    }
+  ]
+}
