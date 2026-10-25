@@ -72,7 +72,7 @@ class DropZoneCard(QFrame):
         self.lbl_drop_hint.setStyleSheet("color: #475569; font-size: 13px; font-weight: 500; background: transparent;")
         area_layout.addWidget(self.lbl_drop_hint)
 
-        self.btn_browse = QPushButton("Parcourir le fichier...")
+        self.btn_browse = QPushButton("📁 Parcourir le fichier...")
         self.btn_browse.setCursor(Qt.PointingHandCursor)
         self.btn_browse.clicked.connect(self.browse_file)
         area_layout.addWidget(self.btn_browse, alignment=Qt.AlignCenter)
@@ -84,7 +84,7 @@ class DropZoneCard(QFrame):
         sheet_layout = QHBoxLayout(self.sheet_widget)
         sheet_layout.setContentsMargins(0, 0, 0, 0)
         
-        lbl_sheet = QLabel("Feuille / Onglet :")
+        lbl_sheet = QLabel("📑 Feuille / Onglet :")
         lbl_sheet.setStyleSheet("font-weight: 600; font-size: 12px; color: #334155;")
         sheet_layout.addWidget(lbl_sheet)
 

@@ -9,7 +9,9 @@ from PyQt5.QtWidgets import (
     QProgressBar, QFrame
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QPixmap
 
+from ui.assets import get_app_icon, get_asset_path
 from ui.drop_zone import DropZoneCard
 from ui.mapping_widget import MappingWidget
 from ui.preview_widget import PreviewWidget
@@ -39,6 +41,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("LogMed RAPP — Rapprochement Intelligent de Tableaux")
+        self.setWindowIcon(get_app_icon())
 
         # Adapter la taille à la zone disponible de l'écran (évite le débordement sous la barre des tâches)
         screen = QApplication.primaryScreen()
@@ -80,6 +83,18 @@ class MainWindow(QMainWindow):
         hero_layout = QHBoxLayout(hero)
         hero_layout.setContentsMargins(18, 10, 18, 10)
 
+        # Logo et titre
+        brand_layout = QHBoxLayout()
+        brand_layout.setSpacing(12)
+
+        logo_lbl = QLabel()
+        logo_pix = QPixmap(get_asset_path("app_icon.png"))
+        if not logo_pix.isNull():
+            logo_lbl.setPixmap(logo_pix.scaled(42, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            logo_lbl.setFixedSize(42, 42)
+            logo_lbl.setStyleSheet("background: transparent;")
+            brand_layout.addWidget(logo_lbl)
+
         title_box = QVBoxLayout()
         title_box.setSpacing(2)
         lbl_app = QLabel("LogMed RAPP")
@@ -88,14 +103,15 @@ class MainWindow(QMainWindow):
         lbl_sub.setStyleSheet("color: rgba(255,255,255,0.75); font-size: 12px; background: transparent;")
         title_box.addWidget(lbl_app)
         title_box.addWidget(lbl_sub)
-        hero_layout.addLayout(title_box)
+        brand_layout.addLayout(title_box)
+        hero_layout.addLayout(brand_layout)
 
         hero_layout.addStretch()
 
         # Indicateur d'étapes
-        self.lbl_step1 = QLabel("1. Fichiers")
-        self.lbl_step2 = QLabel("2. Règles")
-        self.lbl_step3 = QLabel("3. Résultats & Export")
+        self.lbl_step1 = QLabel("📁 1. Fichiers")
+        self.lbl_step2 = QLabel("⚖️ 2. Règles")
+        self.lbl_step3 = QLabel("📊 3. Résultats & Export")
         for lbl in (self.lbl_step1, self.lbl_step2, self.lbl_step3):
             hero_layout.addWidget(lbl)
         self.update_step_labels(0)
@@ -151,7 +167,7 @@ class MainWindow(QMainWindow):
         # 4. Footer de Navigation
         footer = QHBoxLayout()
         footer.setContentsMargins(0, 2, 0, 0)
-        self.btn_prev = QPushButton("< Précédent")
+        self.btn_prev = QPushButton("← Précédent")
         self.btn_prev.setFixedHeight(38)
         self.btn_prev.setCursor(Qt.PointingHandCursor)
         self.btn_prev.clicked.connect(self.go_prev)
@@ -160,14 +176,14 @@ class MainWindow(QMainWindow):
 
         footer.addStretch()
 
-        self.btn_next = QPushButton("Passer aux règles >")
+        self.btn_next = QPushButton("Passer aux règles →")
         self.btn_next.setProperty("class", "btn-primary")
         self.btn_next.setFixedHeight(38)
         self.btn_next.setCursor(Qt.PointingHandCursor)
         self.btn_next.clicked.connect(self.go_next)
         footer.addWidget(self.btn_next)
 
-        self.btn_export = QPushButton("Exporter le Classeur Excel (.xlsx)")
+        self.btn_export = QPushButton("📊 Exporter le Classeur Excel (.xlsx)")
         self.btn_export.setProperty("class", "btn-success")
         self.btn_export.setFixedHeight(38)
         self.btn_export.setCursor(Qt.PointingHandCursor)
@@ -244,7 +260,7 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentIndex(1)
             self.update_step_labels(1)
             self.btn_prev.setVisible(True)
-            self.btn_next.setText("Lancer le Rapprochement >")
+            self.btn_next.setText("⚡ Lancer le Rapprochement")
 
         elif curr == 1:
             criteria = self.mapping_widget.get_configured_criteria()
@@ -266,13 +282,13 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentIndex(0)
             self.update_step_labels(0)
             self.btn_prev.setVisible(False)
-            self.btn_next.setText("Passer aux règles >")
+            self.btn_next.setText("Passer aux règles →")
         elif curr == 2:
             self.stack.setCurrentIndex(1)
             self.update_step_labels(1)
             self.btn_next.setVisible(True)
             self.btn_export.setVisible(False)
-            self.btn_next.setText("Relancer le Rapprochement >")
+            self.btn_next.setText("⚡ Relancer le Rapprochement")
 
     def on_reconciliation_finished(self, results: dict):
         self.progress_bar.setVisible(False)

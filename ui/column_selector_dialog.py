@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from typing import List, Tuple, Optional
+from ui.assets import get_app_icon
 
 class ColumnSelectorDialog(QDialog):
     def __init__(
@@ -21,6 +22,7 @@ class ColumnSelectorDialog(QDialog):
     ):
         super().__init__(parent)
         self.setWindowTitle("Personnaliser les colonnes de résultat")
+        self.setWindowIcon(get_app_icon())
         self.resize(720, 540)
         self.setMinimumSize(600, 450)
 
@@ -39,7 +41,7 @@ class ColumnSelectorDialog(QDialog):
         layout.setSpacing(14)
 
         # En-tête explicatif
-        lbl_title = QLabel("Colonnes à inclure dans les résultats et l'export")
+        lbl_title = QLabel("⚙️ Colonnes à inclure dans les résultats et l'export")
         lbl_title.setStyleSheet("font-size: 15px; font-weight: 700; color: #1e3a8a;")
         lbl_sub = QLabel("Cochez les colonnes souhaitées pour chaque tableau. Seules les colonnes cochées apparaîtront dans la grille et le fichier Excel généré.")
         lbl_sub.setStyleSheet("font-size: 12px; color: #64748b;")
@@ -54,13 +56,13 @@ class ColumnSelectorDialog(QDialog):
 
         # Panneau Tableau A
         panel_a, self.list_a, self.search_a, self.lbl_count_a = self.create_column_panel(
-            "Tableau Source A", self.all_cols_a, self.init_sel_a, "#1e3a8a"
+            "📄 Tableau Source A", self.all_cols_a, self.init_sel_a, "#1e3a8a"
         )
         panels_layout.addWidget(panel_a)
 
         # Panneau Tableau B
         panel_b, self.list_b, self.search_b, self.lbl_count_b = self.create_column_panel(
-            "Tableau Source B", self.all_cols_b, self.init_sel_b, "#0284c7"
+            "📑 Tableau Source B", self.all_cols_b, self.init_sel_b, "#0284c7"
         )
         panels_layout.addWidget(panel_b)
 
@@ -78,7 +80,7 @@ class ColumnSelectorDialog(QDialog):
         btn_cancel.clicked.connect(self.reject)
         footer_layout.addWidget(btn_cancel)
 
-        btn_apply = QPushButton("Appliquer la sélection")
+        btn_apply = QPushButton("✓ Appliquer la sélection")
         btn_apply.setProperty("class", "btn-primary")
         btn_apply.clicked.connect(self.on_apply)
         footer_layout.addWidget(btn_apply)
@@ -113,7 +115,7 @@ class ColumnSelectorDialog(QDialog):
 
         # Barre de recherche rapide
         search_edit = QLineEdit()
-        search_edit.setPlaceholderText(f"Filtrer les colonnes...")
+        search_edit.setPlaceholderText("🔍 Filtrer les colonnes...")
         search_edit.setStyleSheet("padding: 5px 8px; border: 1px solid #e2e8f0; border-radius: 6px;")
         panel_layout.addWidget(search_edit)
 
@@ -144,12 +146,12 @@ class ColumnSelectorDialog(QDialog):
         btn_bar = QHBoxLayout()
         btn_bar.setSpacing(6)
 
-        btn_all = QPushButton("Tout cocher")
+        btn_all = QPushButton("☑ Tout cocher")
         btn_all.setStyleSheet("padding: 4px 8px; font-size: 11px;")
         btn_all.clicked.connect(lambda: self.set_all_checked(list_widget, True))
         btn_bar.addWidget(btn_all)
 
-        btn_none = QPushButton("Tout décocher")
+        btn_none = QPushButton("☐ Tout décocher")
         btn_none.setStyleSheet("padding: 4px 8px; font-size: 11px;")
         btn_none.clicked.connect(lambda: self.set_all_checked(list_widget, False))
         btn_bar.addWidget(btn_none)

@@ -35,7 +35,7 @@ class MappingWidget(QWidget):
 
         # Barre supérieure : Titre et Modèles
         top_bar = QHBoxLayout()
-        lbl_section = QLabel("Critères & Règles d'Appariement :")
+        lbl_section = QLabel("⚖️ Critères & Règles d'Appariement :")
         lbl_section.setStyleSheet("font-weight: bold; font-size: 14px; color: #1e3a8a;")
         top_bar.addWidget(lbl_section)
 
@@ -43,14 +43,14 @@ class MappingWidget(QWidget):
 
         self.combo_profiles = QComboBox()
         self.refresh_profiles_list()
-        top_bar.addWidget(QLabel("Modèle sauvegardé :"))
+        top_bar.addWidget(QLabel("📋 Modèle :"))
         top_bar.addWidget(self.combo_profiles)
 
-        btn_load_profile = QPushButton("Charger")
+        btn_load_profile = QPushButton("📂 Charger")
         btn_load_profile.clicked.connect(self.on_load_profile_clicked)
         top_bar.addWidget(btn_load_profile)
 
-        btn_save_profile = QPushButton("Enregistrer ce modèle...")
+        btn_save_profile = QPushButton("💾 Enregistrer ce modèle...")
         btn_save_profile.clicked.connect(self.on_save_profile_clicked)
         top_bar.addWidget(btn_save_profile)
 
@@ -81,7 +81,7 @@ class MappingWidget(QWidget):
 
         # Barre inférieure : Ajouter / Réinitialiser et sélection des colonnes
         bottom_bar = QHBoxLayout()
-        btn_add = QPushButton("+ Ajouter un critère")
+        btn_add = QPushButton("➕ Ajouter un critère")
         btn_add.setProperty("class", "btn-primary")
         btn_add.clicked.connect(lambda: self.add_criteria_row())
         bottom_bar.addWidget(btn_add)

@@ -2,10 +2,14 @@
 Gestionnaire de profils et modèles de rapprochement récurrents.
 """
 import os
+import sys
 import json
 from typing import List, Dict, Any, Optional
 
-PROFILES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "profiles")
+if getattr(sys, 'frozen', False):
+    PROFILES_DIR = os.path.join(os.path.dirname(sys.executable), "profiles")
+else:
+    PROFILES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "profiles")
 
 DEFAULT_PROFILES = {
     "CNAS vs Facturation": {

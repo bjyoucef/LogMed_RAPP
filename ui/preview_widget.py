@@ -40,11 +40,11 @@ class PreviewWidget(QWidget):
         kpi_bar = QHBoxLayout()
         kpi_bar.setSpacing(10)
 
-        self.card_total_a = self.create_kpi_card("LIGNES (A)", "0", "#1e3a8a")
-        self.card_total_b = self.create_kpi_card("LIGNES (B)", "0", "#0284c7")
-        self.card_matched = self.create_kpi_card("RAPPROCHÉS", "0 (0%)", "#059669")
-        self.card_orphans_a = self.create_kpi_card("SUSPENS (A)", "0", "#d97706")
-        self.card_orphans_b = self.create_kpi_card("SUSPENS (B)", "0", "#dc2626")
+        self.card_total_a = self.create_kpi_card("LIGNES (TABLEAU A)", "0", "#1e3a8a", "📄")
+        self.card_total_b = self.create_kpi_card("LIGNES (TABLEAU B)", "0", "#0284c7", "📑")
+        self.card_matched = self.create_kpi_card("RAPPROCHÉS", "0 (0%)", "#059669", "✅")
+        self.card_orphans_a = self.create_kpi_card("SUSPENS (TABLEAU A)", "0", "#d97706", "⚠️")
+        self.card_orphans_b = self.create_kpi_card("SUSPENS (TABLEAU B)", "0", "#dc2626", "❌")
 
         kpi_bar.addWidget(self.card_total_a)
         kpi_bar.addWidget(self.card_total_b)
@@ -57,7 +57,7 @@ class PreviewWidget(QWidget):
         nav_bar = QHBoxLayout()
         nav_bar.setSpacing(8)
 
-        self.btn_view_matched = QPushButton("Dossiers Rapprochés")
+        self.btn_view_matched = QPushButton("✅ Dossiers Rapprochés")
         self.btn_view_matched.setProperty("class", "nav-tab")
         self.btn_view_matched.setCheckable(True)
         self.btn_view_matched.setChecked(True)
@@ -65,14 +65,14 @@ class PreviewWidget(QWidget):
         self.btn_view_matched.clicked.connect(lambda: self.switch_view("matched"))
         nav_bar.addWidget(self.btn_view_matched)
 
-        self.btn_view_orphans_a = QPushButton("Suspens Tableau A")
+        self.btn_view_orphans_a = QPushButton("⚠️ Suspens Tableau A")
         self.btn_view_orphans_a.setProperty("class", "nav-tab")
         self.btn_view_orphans_a.setCheckable(True)
         self.btn_view_orphans_a.setCursor(Qt.PointingHandCursor)
         self.btn_view_orphans_a.clicked.connect(lambda: self.switch_view("orphans_a"))
         nav_bar.addWidget(self.btn_view_orphans_a)
 
-        self.btn_view_orphans_b = QPushButton("Suspens Tableau B")
+        self.btn_view_orphans_b = QPushButton("❌ Suspens Tableau B")
         self.btn_view_orphans_b.setProperty("class", "nav-tab")
         self.btn_view_orphans_b.setCheckable(True)
         self.btn_view_orphans_b.setCursor(Qt.PointingHandCursor)
@@ -116,7 +116,7 @@ class PreviewWidget(QWidget):
         sub_tools = QHBoxLayout()
         sub_tools.setSpacing(6)
 
-        self.btn_f_all = QPushButton("Tous")
+        self.btn_f_all = QPushButton("📋 Tous")
         self.btn_f_all.setProperty("class", "filter-pill")
         self.btn_f_all.setCheckable(True)
         self.btn_f_all.setChecked(True)
@@ -124,35 +124,35 @@ class PreviewWidget(QWidget):
         self.btn_f_all.clicked.connect(lambda: self.apply_sub_filter("all"))
         sub_tools.addWidget(self.btn_f_all)
 
-        self.btn_f_exact = QPushButton("Exacts")
+        self.btn_f_exact = QPushButton("🎯 Exacts")
         self.btn_f_exact.setProperty("class", "filter-pill")
         self.btn_f_exact.setCheckable(True)
         self.btn_f_exact.setCursor(Qt.PointingHandCursor)
         self.btn_f_exact.clicked.connect(lambda: self.apply_sub_filter("exact"))
         sub_tools.addWidget(self.btn_f_exact)
 
-        self.btn_f_fuzzy = QPushButton("Fuzzy / Variantes")
+        self.btn_f_fuzzy = QPushButton("🔍 Fuzzy / Variantes")
         self.btn_f_fuzzy.setProperty("class", "filter-pill")
         self.btn_f_fuzzy.setCheckable(True)
         self.btn_f_fuzzy.setCursor(Qt.PointingHandCursor)
         self.btn_f_fuzzy.clicked.connect(lambda: self.apply_sub_filter("fuzzy"))
         sub_tools.addWidget(self.btn_f_fuzzy)
 
-        self.btn_f_diff = QPushButton("Avec écarts")
+        self.btn_f_diff = QPushButton("⚖️ Avec écarts")
         self.btn_f_diff.setProperty("class", "filter-pill")
         self.btn_f_diff.setCheckable(True)
         self.btn_f_diff.setCursor(Qt.PointingHandCursor)
         self.btn_f_diff.clicked.connect(lambda: self.apply_sub_filter("diff"))
         sub_tools.addWidget(self.btn_f_diff)
 
-        self.btn_f_grouped = QPushButton("Groupés N-à-1")
+        self.btn_f_grouped = QPushButton("👥 Groupés")
         self.btn_f_grouped.setProperty("class", "filter-pill")
         self.btn_f_grouped.setCheckable(True)
         self.btn_f_grouped.setCursor(Qt.PointingHandCursor)
         self.btn_f_grouped.clicked.connect(lambda: self.apply_sub_filter("grouped"))
         sub_tools.addWidget(self.btn_f_grouped)
 
-        self.btn_f_manual = QPushButton("Manuels")
+        self.btn_f_manual = QPushButton("⚡ Manuels")
         self.btn_f_manual.setProperty("class", "filter-pill")
         self.btn_f_manual.setCheckable(True)
         self.btn_f_manual.setCursor(Qt.PointingHandCursor)
@@ -161,7 +161,7 @@ class PreviewWidget(QWidget):
 
         sub_tools.addStretch()
 
-        self.btn_dissociate = QPushButton("✕ Dissocier la sélection")
+        self.btn_dissociate = QPushButton("↩️ Dissocier la sélection")
         self.btn_dissociate.setProperty("class", "btn-danger")
         self.btn_dissociate.setEnabled(False)
         self.btn_dissociate.setCursor(Qt.PointingHandCursor)
@@ -330,7 +330,7 @@ class PreviewWidget(QWidget):
         self.stack.addWidget(self.view_manual_widget)
         layout.addWidget(self.stack, 1)
 
-    def create_kpi_card(self, title: str, val: str, color_hex: str) -> QFrame:
+    def create_kpi_card(self, title: str, val: str, color_hex: str, icon_str: str = "") -> QFrame:
         card = QFrame()
         card.setObjectName("kpiCard")
         card.setAttribute(Qt.WA_StyledBackground, True)
@@ -344,11 +344,21 @@ class PreviewWidget(QWidget):
         """)
         l = QVBoxLayout(card)
         l.setContentsMargins(14, 12, 14, 12)
-        l.setSpacing(4)
+        l.setSpacing(5)
         
+        top_h = QHBoxLayout()
+        top_h.setContentsMargins(0, 0, 0, 0)
+        top_h.setSpacing(6)
+        if icon_str:
+            lbl_ico = QLabel(icon_str)
+            lbl_ico.setStyleSheet("font-size: 13px; background: transparent;")
+            top_h.addWidget(lbl_ico)
+
         lbl_t = QLabel(title)
         lbl_t.setStyleSheet("font-size: 11px; font-weight: 700; color: #64748b; background: transparent;")
-        l.addWidget(lbl_t)
+        top_h.addWidget(lbl_t)
+        top_h.addStretch()
+        l.addLayout(top_h)
 
         lbl_v = QLabel(val)
         lbl_v.setObjectName("val")
@@ -440,11 +450,11 @@ class PreviewWidget(QWidget):
         self.card_orphans_b.findChild(QLabel, "val").setText(str(orphans_b_count))
 
         # Mettre à jour les labels d'onglets avec les totaux
-        self.btn_view_matched.setText(f"Dossiers Rapprochés ({matched_count})")
-        self.btn_view_orphans_a.setText(f"Suspens Tableau A ({orphans_a_count})")
-        self.btn_view_orphans_b.setText(f"Suspens Tableau B ({orphans_b_count})")
-        self.lbl_pa_title.setText(f"1. Suspens Tableau A ({orphans_a_count} lignes)")
-        self.lbl_pb_title.setText(f"2. Suspens Tableau B ({orphans_b_count} lignes)")
+        self.btn_view_matched.setText(f"✅ Dossiers Rapprochés ({matched_count})")
+        self.btn_view_orphans_a.setText(f"⚠️ Suspens Tableau A ({orphans_a_count})")
+        self.btn_view_orphans_b.setText(f"❌ Suspens Tableau B ({orphans_b_count})")
+        self.lbl_pa_title.setText(f"📄 Suspens Tableau A ({orphans_a_count} lignes)")
+        self.lbl_pb_title.setText(f"📑 Suspens Tableau B ({orphans_b_count} lignes)")
 
         # Mettre à jour les compteurs des sous-filtres
         self.update_sub_filter_labels()
@@ -464,12 +474,12 @@ class PreviewWidget(QWidget):
         c_grouped = sum(1 for m in matched if m.get("badge_type") == "grouped")
         c_manual = sum(1 for m in matched if m.get("badge_type") == "manual")
 
-        self.btn_f_all.setText(f"Tous ({c_all})")
-        self.btn_f_exact.setText(f"Exacts ({c_exact})")
-        self.btn_f_fuzzy.setText(f"Fuzzy / Variantes ({c_fuzzy})")
-        self.btn_f_diff.setText(f"Avec écarts ({c_diff})")
-        self.btn_f_grouped.setText(f"Groupés ({c_grouped})")
-        self.btn_f_manual.setText(f"Manuels ({c_manual})")
+        self.btn_f_all.setText(f"📋 Tous ({c_all})")
+        self.btn_f_exact.setText(f"🎯 Exacts ({c_exact})")
+        self.btn_f_fuzzy.setText(f"🔍 Fuzzy ({c_fuzzy})")
+        self.btn_f_diff.setText(f"⚖️ Avec écarts ({c_diff})")
+        self.btn_f_grouped.setText(f"👥 Groupés ({c_grouped})")
+        self.btn_f_manual.setText(f"⚡ Manuels ({c_manual})")
 
     def switch_view(self, view_id: str):
         self.current_view = view_id

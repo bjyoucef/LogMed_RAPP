@@ -285,5 +285,19 @@ class TestReconciliationEngine(unittest.TestCase):
         pw.search_man_a.clear()
         self.assertEqual(pw.table_man_a.rowCount(), 1)
 
+    def test_app_icon_and_assets(self):
+        """Vérifie la présence et le chargement valide des icônes de l'application."""
+        import os
+        from ui.assets import get_asset_path, get_app_icon
+        ico_file = get_asset_path("app_icon.ico")
+        png_file = get_asset_path("app_icon.png")
+        self.assertTrue(os.path.exists(ico_file), f"Fichier ICO introuvable : {ico_file}")
+        self.assertTrue(os.path.exists(png_file), f"Fichier PNG introuvable : {png_file}")
+
+        from PyQt5.QtWidgets import QApplication
+        app = QApplication.instance() or QApplication(sys.argv)
+        icon = get_app_icon()
+        self.assertFalse(icon.isNull(), "L'icône chargée est nulle")
+
 if __name__ == "__main__":
     unittest.main()
